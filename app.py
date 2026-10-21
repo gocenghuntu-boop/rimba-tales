@@ -39,11 +39,17 @@ SYSTEM_PROMPT = (
 )
 
 
+USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/126.0 Safari/537.36 RimbaTales/1.0"
+)
+
+
 def http_post_json(url: str, payload: dict, headers: dict, timeout: int = 30) -> dict:
     req = urllib.request.Request(
         url,
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json", **headers},
+        headers={"Content-Type": "application/json", "User-Agent": USER_AGENT, **headers},
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -95,7 +101,8 @@ def narrate_with_elevenlabs(text: str):
             "model_id": ELEVENLABS_MODEL,
             "voice_settings": {"stability": 0.6, "similarity_boost": 0.75, "style": 0.2},
         }).encode("utf-8"),
-        headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json"},
+        headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json",
+                 "User-Agent": USER_AGENT},
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=60) as resp:
