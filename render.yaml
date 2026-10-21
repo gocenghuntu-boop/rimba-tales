@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: rimba-tales
+    runtime: python
+    plan: starter
+    buildCommand: "true"
+    startCommand: python app.py
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        sync: false

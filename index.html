@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rimba Tales — Bedtime Stories, Read For You</title>
+<meta name="description" content="A bedtime story narrator for tired parents. Pick an animal and a theme, and Rimba Tales writes a calming story and reads it aloud.">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="stars" aria-hidden="true"></div>
+<main class="wrap">
+  <header>
+    <div class="moon" aria-hidden="true">🌙</div>
+    <h1>Rimba Tales</h1>
+    <p class="tagline">Bedtime stories from the rainforest, written and read aloud for you.
+      For parents whose voice is tired, and kids who always want one more story.</p>
+    <p class="badges">
+      <span class="badge" id="engineBadge">{{ENGINE_BADGE}}</span>
+      <span class="badge" id="voiceBadge">{{VOICE_BADGE}}</span>
+    </p>
+  </header>
+
+  <section class="card">
+    <label>
+      Animal hero
+      <select id="animal">
+        <option value="elephant">🦣 Nara the Elephant</option>
+        <option value="lion">🦁 Raka the Lion Cub</option>
+        <option value="owl">🦉 Luma the Owl</option>
+        <option value="mousedeer">🦌 Kiki the Mousedeer</option>
+        <option value="turtle">🐢 Sasa the Turtle</option>
+      </select>
+    </label>
+    <label>
+      Tonight's gentle lesson
+      <select id="theme">
+        <option value="kindness">Kindness</option>
+        <option value="courage">Courage</option>
+        <option value="friendship">Friendship</option>
+        <option value="gratitude">Gratitude</option>
+        <option value="patience">Patience</option>
+      </select>
+    </label>
+    <label>
+      Language
+      <select id="language">
+        <option value="en">English</option>
+        <option value="id">Bahasa Indonesia</option>
+      </select>
+    </label>
+    <label>
+      Child's name (optional)
+      <input id="childName" type="text" maxlength="40" placeholder="e.g. Aira">
+    </label>
+    <button id="makeStory" class="primary">Make tonight's story ✨</button>
+    <p class="hint" id="status"></p>
+  </section>
+
+  <section class="card story" id="storyCard" hidden>
+    <h2 id="storyTitle"></h2>
+    <p class="source" id="storySource"></p>
+    <div class="actions">
+      <button id="listenBtn" class="primary">🔊 Read it to us</button>
+      <button id="stopBtn" class="ghost" hidden>⏹ Stop</button>
+    </div>
+    <audio id="player" controls hidden></audio>
+    <div id="storyText"></div>
+    <p class="payoff">⏳ The Lazy Payoff: tonight Rimba Tales saved you roughly 12 minutes of
+      inventing a plot, finding a moral, and reading it out loud. Put your feet up.</p>
+  </section>
+
+  <footer>
+    <p>Built for the Hacktoberfest Open-Source AI Challenge, Week 3: Slow and Steady.
+      Stories come from an open-weight model (Llama) when configured, or a local offline
+      composer that needs no key and no network. Narration by ElevenLabs when configured,
+      or your device's own voice. Deployed on Render.</p>
+  </footer>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>
