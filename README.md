@@ -7,8 +7,9 @@
 **▶ Live demo: [rimba-tales.onrender.com](https://rimba-tales.onrender.com)**
 *(Starter instance funded by Hacktoberfest Render credit: always awake, no cold starts)*
 
-**▶ Watch: [demo.mp4](demo.mp4)** — 45 seconds, a real story written live by the
-open-weight model and read aloud by Ibu Rimba (ElevenLabs). Screenshots:
+**▶ Watch: [demo.mp4](demo.mp4)** — 42 seconds: an animated telling of a real
+story written live by the open-weight model, read aloud by Ibu Rimba
+(ElevenLabs), over the cover art brought to life. Screenshots:
 [home](screenshot-home.png) · [story](screenshot-story.png)
 
 Rimba Tales is a tiny wind-down companion for the most universal lazy moment in
