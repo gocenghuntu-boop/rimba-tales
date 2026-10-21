@@ -54,7 +54,7 @@ $("listenBtn").addEventListener("click", async () => {
     const res = await fetch("/api/narrate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: currentStory.text, language: currentLang }),
+      body: JSON.stringify({ text: currentStory.text, language: currentLang, voice: $("voice").value }),
     });
     const data = await res.json();
     if (data.audio_base64) {

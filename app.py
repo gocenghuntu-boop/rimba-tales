@@ -164,9 +164,16 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
         return None
 
 
-def narrate_with_elevenlabs(text: str):
+NARRATOR_VOICES = {
+    "ibu": "21m00Tcm4TlvDq8ikWAM",    # Rachel: Ibu Rimba, a warm mother's voice
+    "bapak": "JBFqnCBsd6RMkjVDRZzb",  # George: Bapak Rimba, a warm father's voice
+}
+
+
+def narrate_with_elevenlabs(text: str, voice_key: str = "ibu"):
+    voice_id = NARRATOR_VOICES.get(voice_key, ELEVENLABS_VOICE_ID)
     req = urllib.request.Request(
-        f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}",
+        f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
         data=json.dumps({
             "text": text[:2500],
             "model_id": ELEVENLABS_MODEL,
@@ -267,11 +274,12 @@ class Handler(BaseHTTPRequestHandler):
                 return
             data = self._read_json()
             text = str(data.get("text", "")).strip()
+            voice = str(data.get("voice", "ibu")).lower()
             if not text:
                 self._send_json({"error": "empty text"}, 400)
                 return
             try:
-                audio = narrate_with_elevenlabs(text)
+                audio = narrate_with_elevenlabs(text, voice)
                 self._send_json({
                     "audio_base64": base64.b64encode(audio).decode("ascii"),
                     "content_type": "audio/mpeg",
