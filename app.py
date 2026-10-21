@@ -56,8 +56,13 @@ def http_post_json(url: str, payload: dict, headers: dict, timeout: int = 30) ->
         return json.loads(resp.read().decode("utf-8"))
 
 
+LAST_GROQ_ERROR = "not attempted yet"
+
+
 def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
+    global LAST_GROQ_ERROR
     if not GROQ_API_KEY:
+        LAST_GROQ_ERROR = "GROQ_API_KEY not set"
         return None
     lang_name = "English" if language == "en" else "Bahasa Indonesia"
     dedication = f" The story is a gift for a child named {child_name}." if child_name else ""
@@ -81,7 +86,9 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
             timeout=30,
         )
         text = data["choices"][0]["message"]["content"].strip()
+        LAST_GROQ_ERROR = ""
         if len(text) < 200:
+            LAST_GROQ_ERROR = f"model returned short text ({len(text)} chars)"
             return None
         first_line, _, rest = text.partition("\n")
         if len(first_line) < 90 and rest.strip():
@@ -89,7 +96,15 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
                     "source": f"open-weight model ({GROQ_MODEL} via Groq)"}
         return {"title": "A Rimba Bedtime Tale", "text": text,
                 "source": f"open-weight model ({GROQ_MODEL} via Groq)"}
-    except Exception:
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = exc.read()[:200].decode("utf-8", "replace")
+        except Exception:
+            detail = ""
+        LAST_GROQ_ERROR = f"HTTP {exc.code}: {detail}"
+        return None
+    except Exception as exc:
+        LAST_GROQ_ERROR = f"{type(exc).__name__}: {exc}"
         return None
 
 
@@ -152,6 +167,14 @@ class Handler(BaseHTTPRequestHandler):
                 "status": "ok",
                 "story_engine": "groq" if GROQ_API_KEY else "local",
                 "narrator": "elevenlabs" if ELEVENLABS_API_KEY else "browser",
+            })
+        elif self.path == "/api/debug":
+            self._send_json({
+                "groq_configured": bool(GROQ_API_KEY),
+                "groq_key_length": len(GROQ_API_KEY),
+                "groq_model": GROQ_MODEL,
+                "last_groq_error": LAST_GROQ_ERROR,
+                "elevenlabs_configured": bool(ELEVENLABS_API_KEY),
             })
         elif self.path in ("/static/style.css", "/static/app.js"):
             target = BASE / Path(self.path).name
