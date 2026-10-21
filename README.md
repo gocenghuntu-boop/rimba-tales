@@ -39,6 +39,8 @@ Narration also has two layers:
 
 1. **ElevenLabs** text-to-speech when `ELEVENLABS_API_KEY` is set
    (`eleven_multilingual_v2`, so Indonesian stories sound Indonesian).
+   Readers pick the narrator: **Ibu Rimba** (a warm mother's voice) or
+   **Bapak Rimba** (a warm father's voice).
 2. **The browser's built-in voice** (Web Speech API) otherwise, which is
    free and runs entirely on the reader's device.
 
