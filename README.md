@@ -5,7 +5,7 @@
 **Bedtime stories from the rainforest, written and read aloud for you.**
 
 **▶ Live demo: [rimba-tales.onrender.com](https://rimba-tales.onrender.com)**
-*(free instance: if it has been asleep, the first load takes about a minute)*
+*(Starter instance funded by Hacktoberfest Render credit: always awake, no cold starts)*
 
 Rimba Tales is a tiny wind-down companion for the most universal lazy moment in
 parenting: it is late, your voice is tired, and a small person asks for
