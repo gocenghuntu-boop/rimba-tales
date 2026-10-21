@@ -234,9 +234,14 @@ class Handler(BaseHTTPRequestHandler):
                 "last_groq_error": LAST_GROQ_ERROR,
                 "elevenlabs_configured": bool(ELEVENLABS_API_KEY),
             })
-        elif self.path in ("/static/style.css", "/static/app.js"):
+        elif self.path in ("/static/style.css", "/static/app.js", "/static/cover.jpg"):
             target = BASE / Path(self.path).name
-            ctype = "text/css" if self.path.endswith(".css") else "application/javascript"
+            if self.path.endswith(".css"):
+                ctype = "text/css"
+            elif self.path.endswith(".jpg"):
+                ctype = "image/jpeg"
+            else:
+                ctype = "application/javascript"
             if target.exists():
                 self._send(target.read_bytes(), ctype)
             else:

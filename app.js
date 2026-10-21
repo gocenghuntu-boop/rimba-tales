@@ -48,7 +48,7 @@ $("listenBtn").addEventListener("click", async () => {
   if (!currentStory) return;
   const btn = $("listenBtn");
   btn.disabled = true;
-  btn.textContent = "Preparing the voice…";
+  btn.textContent = "Preparing the voice… (a story takes a few seconds to voice)";
   stopAllAudio();
   try {
     const res = await fetch("/api/narrate", {

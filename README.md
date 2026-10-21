@@ -1,6 +1,11 @@
 # Rimba Tales 🌙
 
+![The Rimba friends gathered under a smiling moon](cover.jpg)
+
 **Bedtime stories from the rainforest, written and read aloud for you.**
+
+**▶ Live demo: [rimba-tales.onrender.com](https://rimba-tales.onrender.com)**
+*(free instance: if it has been asleep, the first load takes about a minute)*
 
 Rimba Tales is a tiny wind-down companion for the most universal lazy moment in
 parenting: it is late, your voice is tired, and a small person asks for
@@ -17,8 +22,11 @@ Bahasa Indonesia, and can be personalised with the child's name.
 Story generation has two layers, in order of preference:
 
 1. **Open-weight model (live):** when `GROQ_API_KEY` is set, stories are
-   written by an open-weight model (Llama 3.3 70B, `llama-3.3-70b-versatile`,
-   served by Groq). The model is prompted as a gentle bedtime storyteller:
+   written by an open-weight model served by Groq. The app asks Groq which
+   models the key can access and auto-selects the best chat model (on the
+   live deployment that is OpenAI's open-weight `gpt-oss-120b`), because
+   hosted model names change over time; pin `GROQ_MODEL` to override.
+   The model is prompted as a gentle bedtime storyteller:
    simple language, no scary parts, a small kind lesson, and a breathing
    exercise at the end.
 2. **Local story engine (offline):** when there is no key (or the request
@@ -81,6 +89,7 @@ Manual setup works too: create a Web Service from the repo with build command
 ```
 app.py            the service (stdlib-only): pages, /api/story, /api/narrate, /health
 stories.py        the local offline story engine (animals, themes, scenes)
+cover.jpg         cover illustration: the five Rimba friends under the moon
 index.html        the single-page UI
 style.css         night-sky styling
 app.js            page logic and the browser-voice narration fallback
