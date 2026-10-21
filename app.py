@@ -114,9 +114,15 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
         return None
     lang_name = "English" if language == "en" else "Bahasa Indonesia"
     dedication = f" The story is a gift for a child named {child_name}." if child_name else ""
+    hero_name = ""
+    try:
+        hero_name = stories.ANIMALS[animal][language]["name"]
+    except Exception:
+        hero_name = animal
     user_prompt = (
-        f"Write the story in {lang_name}. Hero animal: {animal}. Theme: {theme}.{dedication} "
-        "Set it in the Rimba rainforest at bedtime. Put the title alone on the first line."
+        f"Write the story in {lang_name}. The hero is {hero_name} (a {animal}). Theme: {theme}.{dedication} "
+        "Set it in the Rimba rainforest at bedtime. Put the title alone on the first line, "
+        "as plain text with no markdown symbols."
     )
     try:
         data = http_post_json(
@@ -140,7 +146,8 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
             return None
         first_line, _, rest = text.partition("\n")
         if len(first_line) < 90 and rest.strip():
-            return {"title": first_line.strip("# ").strip(), "text": rest.strip(),
+            clean_title = first_line.strip().strip("#* ").strip()
+            return {"title": clean_title, "text": rest.strip(),
                     "source": f"open-weight model ({model} via Groq)"}
         return {"title": "A Rimba Bedtime Tale", "text": text,
                 "source": f"open-weight model ({model} via Groq)"}
