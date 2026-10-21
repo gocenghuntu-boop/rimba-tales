@@ -25,7 +25,12 @@ import stories
 BASE = Path(__file__).parent
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "")  # empty = auto-discover from the account
+RESOLVED_MODEL = ""
+MODEL_PREFERENCE = (
+    "llama-4", "llama-3.3", "llama-3.2", "llama-3.1", "gpt-oss",
+    "qwen", "gemma", "mixtral", "mistral", "llama",
+)
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
 ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
@@ -59,10 +64,53 @@ def http_post_json(url: str, payload: dict, headers: dict, timeout: int = 30) ->
 LAST_GROQ_ERROR = "not attempted yet"
 
 
+def http_get_json(url: str, headers: dict, timeout: int = 15) -> dict:
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": USER_AGENT, **headers},
+        method="GET",
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def discover_groq_model() -> str:
+    """Ask Groq which models this key can use, pick the best open-weight chat model."""
+    global RESOLVED_MODEL, LAST_GROQ_ERROR
+    if RESOLVED_MODEL:
+        return RESOLVED_MODEL
+    if GROQ_MODEL:
+        RESOLVED_MODEL = GROQ_MODEL
+        return RESOLVED_MODEL
+    try:
+        data = http_get_json(
+            "https://api.groq.com/openai/v1/models",
+            {"Authorization": f"Bearer {GROQ_API_KEY}"},
+        )
+        ids = [m.get("id", "") for m in data.get("data", [])]
+        ids = [i for i in ids if i and "whisper" not in i and "tts" not in i
+               and "guard" not in i and "embed" not in i]
+        for pref in MODEL_PREFERENCE:
+            for mid in ids:
+                if pref in mid.lower():
+                    RESOLVED_MODEL = mid
+                    return RESOLVED_MODEL
+        if ids:
+            RESOLVED_MODEL = ids[0]
+            return RESOLVED_MODEL
+        LAST_GROQ_ERROR = "Groq returned no usable chat models"
+    except Exception as exc:
+        LAST_GROQ_ERROR = f"model discovery failed: {type(exc).__name__}: {exc}"
+    return ""
+
+
 def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
     global LAST_GROQ_ERROR
     if not GROQ_API_KEY:
         LAST_GROQ_ERROR = "GROQ_API_KEY not set"
+        return None
+    model = discover_groq_model()
+    if not model:
         return None
     lang_name = "English" if language == "en" else "Bahasa Indonesia"
     dedication = f" The story is a gift for a child named {child_name}." if child_name else ""
@@ -74,7 +122,7 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
         data = http_post_json(
             "https://api.groq.com/openai/v1/chat/completions",
             {
-                "model": GROQ_MODEL,
+                "model": model,
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": user_prompt},
@@ -93,9 +141,9 @@ def generate_with_groq(animal: str, theme: str, language: str, child_name: str):
         first_line, _, rest = text.partition("\n")
         if len(first_line) < 90 and rest.strip():
             return {"title": first_line.strip("# ").strip(), "text": rest.strip(),
-                    "source": f"open-weight model ({GROQ_MODEL} via Groq)"}
+                    "source": f"open-weight model ({model} via Groq)"}
         return {"title": "A Rimba Bedtime Tale", "text": text,
-                "source": f"open-weight model ({GROQ_MODEL} via Groq)"}
+                "source": f"open-weight model ({model} via Groq)"}
     except urllib.error.HTTPError as exc:
         try:
             detail = exc.read()[:200].decode("utf-8", "replace")
@@ -127,8 +175,9 @@ def narrate_with_elevenlabs(text: str):
 def render_index() -> bytes:
     html = (BASE / "index.html").read_text(encoding="utf-8")
     engine_badge = (
-        f"Story engine: open-weight model ({GROQ_MODEL} via Groq)" if GROQ_API_KEY
-        else "Story engine: local offline composer"
+        f"Story engine: open-weight model ({GROQ_MODEL} via Groq)" if GROQ_MODEL
+        else ("Story engine: open-weight model via Groq (auto-selected)" if GROQ_API_KEY
+              else "Story engine: local offline composer")
     )
     voice_badge = "Narrator: ElevenLabs" if ELEVENLABS_API_KEY else "Narrator: your browser voice"
     html = html.replace("{{ENGINE_BADGE}}", engine_badge)
@@ -172,7 +221,8 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({
                 "groq_configured": bool(GROQ_API_KEY),
                 "groq_key_length": len(GROQ_API_KEY),
-                "groq_model": GROQ_MODEL,
+                "groq_model_env": GROQ_MODEL,
+                "resolved_model": RESOLVED_MODEL,
                 "last_groq_error": LAST_GROQ_ERROR,
                 "elevenlabs_configured": bool(ELEVENLABS_API_KEY),
             })
