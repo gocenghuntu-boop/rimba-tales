@@ -4,7 +4,8 @@ Zero third-party dependencies: this service runs on the Python standard
 library alone, so it deploys anywhere Python does, with nothing to install.
 
 Story generation, in order of preference:
-  1. An open-weight model (Llama 3.3) served by Groq, when GROQ_API_KEY is set.
+  1. An open-weight model served by Groq (auto-selected from the models the
+     API key can access), when GROQ_API_KEY is set.
   2. A local, offline story engine (stories.py) that needs nothing at all.
 
 Narration, in order of preference:
@@ -28,7 +29,7 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "")  # empty = auto-discover from the account
 RESOLVED_MODEL = ""
 MODEL_PREFERENCE = (
-    "llama-4", "llama-3.3", "llama-3.2", "llama-3.1", "gpt-oss",
+    "llama-4", "llama-3.3", "llama-3.2", "llama-3.1", "gpt-oss-120b", "gpt-oss",
     "qwen", "gemma", "mixtral", "mistral", "llama",
 )
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
